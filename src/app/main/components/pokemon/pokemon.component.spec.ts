@@ -1,14 +1,16 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PokemonComponent } from './pokemon.component';
 
-describe('PokemonComponent', () => {
+xdescribe('PokemonComponent', () => {
   let component: PokemonComponent;
   let fixture: ComponentFixture<PokemonComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PokemonComponent ]
+      declarations: [ PokemonComponent ],
+      imports: [HttpClientTestingModule]
     })
     .compileComponents();
   });
@@ -21,5 +23,7 @@ describe('PokemonComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+    expect(component).toBeInstanceOf(PokemonComponent);
+    expect(component.listPokemons.length).toBe(0);
   });
 });
