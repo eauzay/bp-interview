@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Pokemon } from '../../models/pokemon';
 import { PokemonService } from '../../services/pokemon.service';
+import { Constants } from '../../constants/constants';
 
 @Component({
   selector: 'app-pokemon',
@@ -16,11 +17,12 @@ export class PokemonComponent implements OnInit {
   nameSearch: string = "";
   listTemp: Pokemon[] = [];
   titleModal: string = "";
-
+  readonly iconSrc = Constants.iconsUrl;
 
   constructor(private _pokemonService: PokemonService, private formBuilder: FormBuilder) {
     this.initForm();
-    this.titleModal  }
+    this.titleModal
+  }
 
   ngOnInit(): void {
     this.getAllPokemon();
@@ -29,17 +31,17 @@ export class PokemonComponent implements OnInit {
   initForm() {
     this.form = this.formBuilder.group({
       id: new FormControl(''),
-      name: new FormControl(''),
+      name: new FormControl('', { validators: [Validators.required] }),
       image: new FormControl(''),
-      attack: new FormControl('', { validators: [Validators.required] }),
-      defense: new FormControl('', { validators: [Validators.required] }),
+      attack: new FormControl('0', { validators: [Validators.required] }),
+      defense: new FormControl('0', { validators: [Validators.required] }),
       type: new FormControl('normal'),
-      hp: new FormControl('', { validators: [Validators.required] }),
+      hp: new FormControl('0', { validators: [Validators.required] }),
       idAuthor: new FormControl(1),
     })
   }
 
-  getAllPokemon() {
+  private getAllPokemon() {
     this._pokemonService.getAll().subscribe(
       response => {
         this.listPokemons = response;
@@ -51,7 +53,7 @@ export class PokemonComponent implements OnInit {
     )
   }
 
-  getById(id: number) {
+  private getById(id: number) {
     this._pokemonService.getById(id).subscribe(
       response => {
         this.form.get('id')?.setValue(response.id);
@@ -68,10 +70,9 @@ export class PokemonComponent implements OnInit {
     )
   }
 
-  newPokemon(pokemon: Pokemon) {
+  private newPokemon(pokemon: Pokemon) {
     this._pokemonService.new(pokemon).subscribe(
       response => {
-        console.log(response);
         this.getAllPokemon();
       },
       error => {
@@ -79,10 +80,9 @@ export class PokemonComponent implements OnInit {
       })
   }
 
-  updatePokemon( pokemon: Pokemon) {
+  private updatePokemon(pokemon: Pokemon) {
     this._pokemonService.update(pokemon.id, pokemon).subscribe(
       response => {
-        console.log(response);
         this.getAllPokemon();
       },
       error => {
@@ -90,7 +90,7 @@ export class PokemonComponent implements OnInit {
       })
   }
 
-  clickOnButtonSearch() {
+  public clickOnButtonSearch() {
     let textSearch = this.nameSearch.toLowerCase();
 
     if (textSearch === '') {
@@ -103,12 +103,12 @@ export class PokemonComponent implements OnInit {
     }
   }
 
-  clickOnButtonNew() {
+  public clickOnButtonNew() {
     this.titleModal = "Nuevo Pokemon";
     this.viewModalNew = true;
   }
 
-  onClickSaveButton() {
+  public onClickSaveButton() {
     const pokemon = this.form.getRawValue();
     if (pokemon.id) {
       this.updatePokemon(pokemon);
@@ -119,10 +119,9 @@ export class PokemonComponent implements OnInit {
     this.viewModalNew = false;
   }
 
-  onClickButtonDelete(id: number) {
+  public onClickButtonDelete(id: number) {
     this._pokemonService.delete(id).subscribe(
       response => {
-        console.log(response);
         this.getAllPokemon();
       },
       error => {
@@ -130,12 +129,12 @@ export class PokemonComponent implements OnInit {
       })
   }
 
-  onClickCancelButton() {
+  public onClickCancelButton() {
     this.viewModalNew = false;
     this.form.reset();
   }
 
-  onClickButtonEdit(id: number) {
+  public onClickButtonEdit(id: number) {
     this.titleModal = "Editar Pokemon";
     this.viewModalNew = true;
     this.getById(id);

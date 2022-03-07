@@ -2,12 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Pokemon } from '../models/pokemon';
+import {Constants} from '../constants/constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PokemonService {
-  api: string = "https://pokemon-pichincha.herokuapp.com/pokemons";
+  
+  readonly api = Constants.apiUrl; 
 
   constructor(private http: HttpClient) { }
 
