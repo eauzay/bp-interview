@@ -1,65 +1,111 @@
-import { TestBed, getTestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController
+} from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+
+import {
+  mockPokemon1,
+  mockPokemon2,
+  mockPokemonArray,
+} from '../test/mocks/pokemon';
 import { PokemonService } from './pokemon.service';
 import { Pokemon } from '../models/pokemon';
 
-xdescribe('PokemonService', () => {
+describe('PokemonService', () => {
+  let service: PokemonService;
+  let httpController: HttpTestingController;
 
- // let service: PokemonService;
-  let injector: TestBed;
-  let httpMock: HttpTestingController;
+  let url = 'https://pokemon-pichincha.herokuapp.com/pokemons';
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule
-      ]
+      imports: [HttpClientTestingModule],
     });
-    injector = getTestBed();
-    httpMock = injector.get(HttpTestingController) 
+    service = TestBed.inject(PokemonService);
+    httpController = TestBed.inject(HttpTestingController);
   });
 
-  xit('should be created', () => {
-    const service: PokemonService = TestBed.get(PokemonService);
-    expect(service).toBeTruthy();
+
+  it('Debe retornar todos los pokemos', () => {
+    service.getAll().subscribe((res) => {
+      expect(res).toEqual(mockPokemonArray);
+    });
+
+    const req = httpController.expectOne({
+      method: 'GET',
+      url: `${url}/?idAuthor=1`,
+    });
+
+    req.flush(mockPokemonArray);
   });
 
-  xit('shoud return Observable<Pokemon[]>', () => {
-    const service: PokemonService = TestBed.get(PokemonService);
-    let mockPokemon: Pokemon[] = [{
-      "id": 687,
-      "name": "XXX",
-      "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",
-      "type": "normal",
-      "hp": 82,
-      "attack": 100,
-      "defense": 94,
-      "idAuthor": 1,
-      "created_at": "2022-03-05T23:48:59.623Z",
-      "updated_at": "2022-03-05T23:49:57.481Z"
-    },
-    {
-      "id": 668,
-      "name": "LUCARIO editado",
-      "image": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/448_f2.png",
-      "type": "poison",
-      "hp": 34,
-      "attack": 40,
-      "defense": 77,
-      "idAuthor": 1,
-      "created_at": "2022-02-28T15:56:24.375Z",
-      "updated_at": "2022-03-06T03:38:48.230Z"
-    },
-    ];
 
-    service.getAll().subscribe((pokemons) =>{
-      expect(pokemons.length).toBe(2);
-      expect(pokemons).toEqual(mockPokemon);
-      expect(pokemons[0].name).toBeDefined();
-    })
+  it('Debe buscar un pokemon por el Id', () => {
+    const id = 645;
 
-    const req= httpMock.expectOne('https://pokemon-pichincha.herokuapp.com/pokemons');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockPokemon);
-  })
-});
+    service.getById(id).subscribe((data) => {
+      expect(data).toEqual(mockPokemon1);
+    });
+
+    const req = httpController.expectOne({
+      method: 'GET',
+      url: `${url}/${id}`,
+    });
+
+    req.flush(mockPokemon1);
+  });
+
+  it('Debe crear un pokemon', () => {
+    service.new(mockPokemon2).subscribe((data) => {
+      expect(data).toEqual(mockPokemon2);
+    });
+
+    const req = httpController.expectOne({
+      method: 'POST',
+      url: `${url}`,
+    });
+
+    req.flush(mockPokemon2);
+  });
+
+  it('Debe actualizar un pokemon', () => {
+    const updatedPokemon: Pokemon = {
+      id: 645,
+      name: "Pikachu Modificado",
+      image: "https://imagenpng.com/wp-content/uploads/2016/09/Pikachu-png-1-635x624.png",
+      type: "fire",
+      hp: 77,
+      attack: 100,
+      defense: 100,
+      idAuthor: 1,
+      created_at: "2022-02-24T16:09:23.247Z",
+      updated_at: "2022-03-05T22:55:29.095Z"
+    };
+
+    service.update(mockPokemon1.id, mockPokemon1).subscribe((data) => {
+      expect(data).toEqual(updatedPokemon);
+    });
+
+    const req = httpController.expectOne({
+      method: 'PUT',
+      url: `${url}/${mockPokemon1.id}`,
+    });
+
+    req.flush(updatedPokemon);
+  });
+
+  it('Debe eliminar el pokemon', () => {
+    service.delete(mockPokemon2.id).subscribe((data) => {
+      expect(data).toEqual(mockPokemon2);
+    });
+
+    const req = httpController.expectOne({
+      method: 'DELETE',
+      url: `${url}/${mockPokemon2.id}`,
+    });
+
+    req.flush(mockPokemon2);
+  });
+
+})

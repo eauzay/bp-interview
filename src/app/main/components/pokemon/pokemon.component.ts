@@ -25,7 +25,7 @@ export class PokemonComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getAllPokemon();
+    this.getAll();
   }
 
   initForm() {
@@ -41,7 +41,7 @@ export class PokemonComponent implements OnInit {
     })
   }
 
-  private getAllPokemon() {
+  public getAll() {
     this._pokemonService.getAll().subscribe(
       response => {
         this.listPokemons = response;
@@ -70,20 +70,30 @@ export class PokemonComponent implements OnInit {
     )
   }
 
-  private newPokemon(pokemon: Pokemon) {
+  public new(pokemon: Pokemon) {
     this._pokemonService.new(pokemon).subscribe(
       response => {
-        this.getAllPokemon();
+        this.getAll();
       },
       error => {
         console.log(error);
       })
   }
 
-  private updatePokemon(pokemon: Pokemon) {
+  public update(pokemon: Pokemon) {
     this._pokemonService.update(pokemon.id, pokemon).subscribe(
       response => {
-        this.getAllPokemon();
+        this.getAll();
+      },
+      error => {
+        console.log(error);
+      })
+  }
+
+  public delete(id: number) {
+    this._pokemonService.delete(id).subscribe(
+      response => {
+        this.getAll();
       },
       error => {
         console.log(error);
@@ -94,7 +104,7 @@ export class PokemonComponent implements OnInit {
     let textSearch = this.nameSearch.toLowerCase();
 
     if (textSearch === '') {
-      this.getAllPokemon();
+      this.getAll();
     } else {
       this.listPokemons = this.listTemp.filter((element) =>
         element.name.toLowerCase().includes(textSearch) ||
@@ -111,22 +121,19 @@ export class PokemonComponent implements OnInit {
   public onClickSaveButton() {
     const pokemon = this.form.getRawValue();
     if (pokemon.id) {
-      this.updatePokemon(pokemon);
+      this.update(pokemon);
     }
     else {
-      this.newPokemon(pokemon);
+      this.new(pokemon);
     }
     this.viewModalNew = false;
   }
 
   public onClickButtonDelete(id: number) {
-    this._pokemonService.delete(id).subscribe(
-      response => {
-        this.getAllPokemon();
-      },
-      error => {
-        console.log(error);
-      })
+    let eliminar = confirm("Desea eliminar este registro");
+    if (eliminar) {
+      this.delete(id);
+    }
   }
 
   public onClickCancelButton() {

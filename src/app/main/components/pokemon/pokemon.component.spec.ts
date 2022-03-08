@@ -1,87 +1,79 @@
-import { Injectable } from "@angular/core";
-import { Pokemon } from '../../models/pokemon';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { PokemonService } from '../../services/pokemon.service';
+import { PokemonComponent } from './pokemon.component';
+import { of } from 'rxjs';
+import { FormBuilder, FormsModule } from '@angular/forms';
 
-@Injectable()
-export class PokemonService {
-  listPokemons: Pokemon[] = [];
+describe('PokemonComponent', () => {
+  let fixture: ComponentFixture<PokemonComponent>;
+  let component: PokemonComponent;
+  let pokemonSpy: jasmine.SpyObj<PokemonService>;
 
-  getAll(): Pokemon[] {
-    return this.listPokemons;
-  }
+  beforeEach(waitForAsync(() => {
+    pokemonSpy = jasmine.createSpyObj<PokemonService>('PokemonService', ['getAll'])
 
-  new(pokemon: Pokemon): void {
-    this.listPokemons = [...this.listPokemons, pokemon];
-  }
-
-  delete(id: number): void {
-    this.listPokemons = this.listPokemons.filter(x => x.id !== id);
-  }
-
-  update(id: number, pokemon: Pokemon): void {
-    this.listPokemons = this.listPokemons.map(x => {
-      if (x.id === id) {
-        return pokemon;
-      }
-      return x;
-    })
-  }
-}
-
-describe("People Service", () => {
-  let pokemonService: PokemonService;
+    TestBed.configureTestingModule({
+      declarations: [PokemonComponent],
+      providers: [
+        { provide: PokemonService, useValue: pokemonSpy },
+        { provide: FormBuilder }
+      ],
+      imports: [FormsModule]
+    }).compileComponents()
+  }))
 
   beforeEach(() => {
-    pokemonService = new PokemonService();
+    fixture = TestBed.createComponent(PokemonComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
   })
 
-  describe("init", () => {
-    it("should defined", () => {
-      expect(pokemonService).toBeDefined();
-    });
+  it('El metodo getAll debe inicializar el atributo listPokemons', () => {
+    pokemonSpy.getAll.and.returnValue(of([
+      { id: 645, name: "Pikachu", image: "https://imagenpng.com/wp-content/uploads/2016/09/Pikachu-png-1-635x624.png", type: "fire", hp: 77, attack: 100, defense: 100, idAuthor: 1, created_at: "2022-02-24T16:09:23.247Z", updated_at: "2022-03-05T22:55:29.095Z" },
+      { id: 668, name: "LUCARIO", image: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/448_f2.png", type: "poison", hp: 34, attack: 8, defense: 77, idAuthor: 1, created_at: "2022-02-28T15:56:24.375Z", updated_at: "2022-03-07T07:58:19.282Z" }
+    ]));
 
-    it("should create pokemon service with empty pokemon list", () => {
-      expect(pokemonService.listPokemons).toEqual([]);
-    });
-
+    component.getAll();
+    expect(component.listPokemons.length).toBe(2)
   })
 
-  describe("getAll method", () => {
-    it("should get pokemons", () => {
-      expect(pokemonService.getAll()).toEqual([]);
-    })
+  it('El metodo crear debe crear un pokemon', () => {
+    const newPokemon = { id: 645, name: "Pikachu", image: "https://imagenpng.com/wp-content/uploads/2016/09/Pikachu-png-1-635x624.png", type: "fire", hp: 77, attack: 100, defense: 100, idAuthor: 1, created_at: "2022-02-24T16:09:23.247Z", updated_at: "2022-03-05T22:55:29.095Z" }
+    pokemonSpy.new.and.returnValue(of(newPokemon));
+    component.new(newPokemon)
+    expect(component.listPokemons.length).toBe(1);
   })
 
-  describe("new method", () => {
-    const pokemonMock: Pokemon = { id: 645, name: "Pikachu", image: "https://imagenpng.com/wp-content/uploads/2016/09/Pikachu-png-1-635x624.png", type: "fire", hp: 77, attack: 100, defense: 100, idAuthor: 1, created_at: "2022-02-24T16:09:23.247Z", updated_at: "2022-03-05T22:55:29.095Z" }
-    it("should get pokemons", () => {
-      pokemonService.new(pokemonMock);
-      expect(pokemonService.getAll()).toEqual([pokemonMock]);
-    })
+  it('El metodo update debe actualizar un pokemon', () => {
+    const newPokemon = { id: 645, name: "Pikachu", image: "https://imagenpng.com/wp-content/uploads/2016/09/Pikachu-png-1-635x624.png", type: "fire", hp: 77, attack: 100, defense: 100, idAuthor: 1, created_at: "2022-02-24T16:09:23.247Z", updated_at: "2022-03-05T22:55:29.095Z" }
+    pokemonSpy.new.and.returnValue(of(newPokemon));
+    component.new(newPokemon)
+    expect(component.listPokemons.length).toBe(1);
+
+    newPokemon.name ="Pikachu actualizado";
+    pokemonSpy.update.and.returnValue(of(newPokemon));
+    component.update(newPokemon);
+
+    expect(component.listPokemons.length).toBe(1);
+    expect(component.listPokemons[0].name).toBe(newPokemon.name);
   })
 
-  describe("update method", () => {
-    it("should update pokemon", () => {
-      const pokemonMock: Pokemon = { id: 645, name: "Pikachu", image: "https://imagenpng.com/wp-content/uploads/2016/09/Pikachu-png-1-635x624.png", type: "fire", hp: 77, attack: 100, defense: 100, idAuthor: 1, created_at: "2022-02-24T16:09:23.247Z", updated_at: "2022-03-05T22:55:29.095Z" }
-      const pokemonUpdateMock: Pokemon = { id: 645, name: "Pikachu Modificado", image: "https://imagenpng.com/wp-content/uploads/2016/09/Pikachu-png-1-635x624.png", type: "fire", hp: 77, attack: 100, defense: 100, idAuthor: 1, created_at: "2022-02-24T16:09:23.247Z", updated_at: "2022-03-05T22:55:29.095Z" }
-      const expectResult = [{ id: 645, name: "Pikachu Modificado", image: "https://imagenpng.com/wp-content/uploads/2016/09/Pikachu-png-1-635x624.png", type: "fire", hp: 77, attack: 100, defense: 100, idAuthor: 1, created_at: "2022-02-24T16:09:23.247Z", updated_at: "2022-03-05T22:55:29.095Z" }];
+  it('El metodo delete debe eliminar un pokemon', () => {
+    const newPokemon = { id: 645, name: "Pikachu", image: "https://imagenpng.com/wp-content/uploads/2016/09/Pikachu-png-1-635x624.png", type: "fire", hp: 77, attack: 100, defense: 100, idAuthor: 1, created_at: "2022-02-24T16:09:23.247Z", updated_at: "2022-03-05T22:55:29.095Z" }
+    pokemonSpy.new.and.returnValue(of(newPokemon));
+    component.new(newPokemon)
 
-      pokemonService.new(pokemonMock);
-      pokemonService.update(645, pokemonUpdateMock);
+    expect(component.listPokemons.length).toBe(1);
 
-      expect(pokemonService.getAll()).toEqual(expectResult);
-    });
+    pokemonSpy.delete.and.returnValue(of({}))
+    component.delete(newPokemon.id);
 
-  })
-
-  describe("delete method", () => {
-    it("should get pokemons", () => {
-      const pokemonMock: Pokemon = { id: 645, name: "Pikachu", image: "https://imagenpng.com/wp-content/uploads/2016/09/Pikachu-png-1-635x624.png", type: "fire", hp: 77, attack: 100, defense: 100, idAuthor: 1, created_at: "2022-02-24T16:09:23.247Z", updated_at: "2022-03-05T22:55:29.095Z" }
-      pokemonService.new(pokemonMock);
-      expect(pokemonService.getAll()).toEqual([pokemonMock]);
-
-      pokemonService.delete(pokemonMock.id);
-      expect(pokemonService.getAll()).toEqual([]);
-
-    })
+    expect(component.listPokemons.length).toBe(0);
   })
 })
+
+
+
+
+
