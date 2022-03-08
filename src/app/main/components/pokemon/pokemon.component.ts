@@ -21,7 +21,6 @@ export class PokemonComponent implements OnInit {
 
   constructor(private _pokemonService: PokemonService, private formBuilder: FormBuilder) {
     this.initForm();
-    this.titleModal
   }
 
   ngOnInit(): void {
